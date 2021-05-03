@@ -28,10 +28,11 @@ const App = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isDeleteError, setIsDeleteError] = useState(false);
   const [data, setData] = useState([]);
   const [newStageData, setNewStageData] = useState({
     name: "",
-    data: "",
+    date: "",
     id: "",
   });
 
@@ -46,6 +47,18 @@ const App = () => {
       setIsError(true);
     }
     setIsLoading(false);
+  }
+
+  async function deleteStageRaces(id: number) {
+    try {
+      await deleteStageRace(id).then(function () {
+        getStageRaces().then(function (response: any) {
+          setData(response);
+        });
+      });
+    } catch (error) {
+      setIsDeleteError(true);
+    }
   }
 
   useEffect(() => {
@@ -80,7 +93,7 @@ const App = () => {
                       id={stage.id}
                       date={stage.date}
                       name={stage.name}
-                      onDelete={() => deleteStageRace(stage.id)}
+                      onDelete={() => deleteStageRaces(stage.id)}
                     />
                   );
                 })}
@@ -92,7 +105,7 @@ const App = () => {
       )}
 
       <Modal isOpen={modalOpen}>
-        <h1 className="mb-3">Add Stage Race</h1>
+        <h1>Add Stage Race</h1>
         <FormInputGroup
           id={"s"}
           placeholder="Enter stage race name"
@@ -100,14 +113,14 @@ const App = () => {
             setNewStageData({ ...newStageData, name: e.target.value })
           }
         />
-        <h3 className="mb-3">Stages</h3>
-        <p className="mb-3">No stages</p>
-        <p className="mb-3">Duration: 0 days</p>
+        <h3>Stages</h3>
+        <p>No stages</p>
+        <p>Duration: 0 days</p>
         <ButtonWrapper>
           <SecondaryOutlineButton disabled={!newStageData.name}>
             Add Stage
           </SecondaryOutlineButton>
-          <SuccessOutlineButton disabled>Save</SuccessOutlineButton>
+          <SuccessOutlineButton>Save</SuccessOutlineButton>
           <DangerOutlineButton onClick={changeModal}>
             Cancel
           </DangerOutlineButton>

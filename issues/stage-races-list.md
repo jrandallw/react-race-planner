@@ -2,11 +2,11 @@
 
 ## Requirements
 
-- Renders a loading spinner while `GET "/stage-races"` request is in flight.
+- Renders a loading spinner while `GET "/stage-races"` request is in flight. DONE
 
   ![Loading spinner](./screenshots/stage-races-list/1.png)
 
-- Renders "No stage races" when `GET "/stage-races"` succeeds without records.
+- Renders "No stage races" when `GET "/stage-races"` succeeds without records. DONE
 
   ![No stage races](./screenshots/stage-races-list/2.png)
 

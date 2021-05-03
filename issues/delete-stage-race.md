@@ -4,7 +4,7 @@
 
 - Calls `DELETE "/stage-races/{id}"` on "Delete" button click and handles success:
 
-  - Removes deleted stage race from list.
+  - Removes deleted stage race from list. DONE
 
 - Calls `DELETE "/stage-races/{id}"` on "Delete" button click and handles error.
 
