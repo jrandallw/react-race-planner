@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { deleteStageRace, getStageRaces } from "../api";
+import { StageRaceContext } from "../contexts";
+import { IStageRace } from "../types";
 import {
   ButtonWrapper,
   Container,
@@ -13,118 +15,149 @@ import {
   StageRaceFormStageListGroup,
   StageRaceListGroupItem,
   ErrorOverlay,
+  StageRaceFormTotals,
 } from "./shared";
 
-interface IStageRaceListGroupItemProps {
-  id: number;
-  name: string;
-  date: string; // earliest stage date
-  duration: string;
-  onDelete: () => void;
-}
-
 const App = () => {
-  // const [hasStageRaces] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isDeleteError, setIsDeleteError] = useState(false);
-  const [data, setData] = useState([]);
-  const [newStageData, setNewStageData] = useState({
-    name: "",
-    date: "",
-    id: "",
-  });
+  const [hasError, setHasError] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [stageRaceData, setStageRaceData] = useState<IStageRace[]>([]);
 
+  const { activeForm, setActiveForm } = useContext(StageRaceContext);
+
+  // asynchronous function to fetch stage races
   async function fetchStageRaces() {
-    setIsError(false);
+    setHasError(false);
     setIsLoading(true);
     try {
-      await getStageRaces().then(function (response: any) {
-        setData(response);
+      await getStageRaces().then(function (response: IStageRace[]) {
+        setStageRaceData(response);
       });
     } catch (error) {
-      setIsError(true);
+      setHasError(true);
     }
     setIsLoading(false);
   }
 
+  // asynchronous function to delete stage races
   async function deleteStageRaces(id: number) {
     try {
       await deleteStageRace(id).then(function () {
-        getStageRaces().then(function (response: any) {
-          setData(response);
+        getStageRaces().then(function (response: IStageRace[]) {
+          setStageRaceData(response);
         });
       });
     } catch (error) {
-      setIsDeleteError(true);
+      setHasError(true);
     }
   }
 
+  // fetch all stage races from the
+  // API on component mount
   useEffect(() => {
     fetchStageRaces();
   }, []);
 
-  const changeModal = () => {
-    setModalOpen(!modalOpen);
-  };
-
   return (
     <Container>
       <h1 className="mb-3">Stage Races</h1>
-      {isError && (
+      {hasError ? (
         <ErrorOverlay
-          error={"Error loading stage races"}
-          clearError={() => setIsError(false)}
+          error={"No error"}
+          clearError={() => setHasError(false)}
         />
-      )}
+      ) : null}
       {isLoading ? (
         <LoadingSpinner />
       ) : (
         <>
           <StageRaceFormStageListGroup>
-            {data.length === 0
+            {stageRaceData.length === 0
               ? "No stage races"
-              : data.map((stage: IStageRaceListGroupItemProps) => {
+              : stageRaceData.map((stageRace: any) => {
+                  console.log(JSON.stringify(stageRace));
                   return (
                     <StageRaceListGroupItem
-                      duration={(stage.date, "days")}
-                      key={stage.id}
-                      id={stage.id}
-                      date={stage.date}
-                      name={stage.name}
-                      onDelete={() => deleteStageRaces(stage.id)}
+                      duration={(stageRace.date, "days")}
+                      key={stageRace.id}
+                      id={stageRace.id}
+                      date={stageRace.date}
+                      name={stageRace.name}
+                      onDelete={() => deleteStageRaces(stageRace.id)}
                     />
                   );
                 })}
           </StageRaceFormStageListGroup>
           <ButtonWrapper>
-            <PrimaryButton onClick={changeModal}>Add Stage Race</PrimaryButton>
+            <PrimaryButton onClick={() => setIsOpen(true)}>
+              Add Stage Race
+            </PrimaryButton>
           </ButtonWrapper>
         </>
       )}
 
-      <Modal isOpen={modalOpen}>
-        <h1>Add Stage Race</h1>
-        <FormInputGroup
-          id={"s"}
-          placeholder="Enter stage race name"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setNewStageData({ ...newStageData, name: e.target.value })
-          }
-        />
-        <h3>Stages</h3>
-        <p>No stages</p>
-        <p>Duration: 0 days</p>
-        <ButtonWrapper>
-          <SecondaryOutlineButton disabled={!newStageData.name}>
-            Add Stage
-          </SecondaryOutlineButton>
-          <SuccessOutlineButton>Save</SuccessOutlineButton>
-          <DangerOutlineButton onClick={changeModal}>
-            Cancel
-          </DangerOutlineButton>
-        </ButtonWrapper>
+      <Modal isOpen={isOpen}>
+        {activeForm === "add-stage-race" ? (
+          <>
+            <h1>Add Stage Race</h1>
+            <FormInputGroup
+              id={"Stage Race Name"}
+              type="text"
+              placeholder="Enter stage race name"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInputValue(e.target.value)
+              }
+            />
+            <h3>Stages</h3>
+
+            <StageRaceFormTotals duration="6" />
+
+            <ButtonWrapper>
+              <SecondaryOutlineButton
+                disabled={!inputValue}
+                onClick={() => setActiveForm("add-stage-form")}
+              >
+                Add Stage
+              </SecondaryOutlineButton>
+              <SuccessOutlineButton>Save</SuccessOutlineButton>
+              <DangerOutlineButton onClick={() => setIsOpen(false)}>
+                Cancel
+              </DangerOutlineButton>
+            </ButtonWrapper>
+          </>
+        ) : activeForm === "add-stage-form" ? (
+          <>
+            <h1>Add Stage</h1>
+            <FormInputGroup
+              id={"Stage Name"}
+              label="Name"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInputValue(e.target.value)
+              }
+            />
+            <FormInputGroup
+              id={"Stage Date"}
+              label="Date"
+              type="date"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInputValue(e.target.value)
+              }
+            />
+            <ButtonWrapper>
+              <SecondaryOutlineButton disabled={!inputValue}>
+                Add Stage
+              </SecondaryOutlineButton>
+              <SuccessOutlineButton>Save</SuccessOutlineButton>
+              <DangerOutlineButton onClick={() => setIsOpen(false)}>
+                Cancel
+              </DangerOutlineButton>
+            </ButtonWrapper>
+          </>
+        ) : (
+          <></>
+        )}
       </Modal>
     </Container>
   );
