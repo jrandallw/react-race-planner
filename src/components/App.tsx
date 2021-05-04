@@ -1,3 +1,4 @@
+import moment from "moment";
 import { useEffect, useReducer, useState } from "react";
 import { addStageRace, deleteStageRace, getStageRaces } from "../api";
 import { IStage, IStageRace } from "../types";
@@ -145,13 +146,24 @@ const App = () => {
           <StageRaceFormStageListGroup>
             {state.stageRaces.length === 0
               ? "No stage races"
-              : state.stageRaces.map((stageRace: IStage) => {
+              : state.stageRaces.map((stageRace: any, index: number) => {
+                  const dates = stageRace.stages.map((stage: IStage) =>
+                    moment(stage.date)
+                  );
+                  const date = moment.min(dates).format("YYYY-MM-DD");
+
+                  const numberOfDays = dates.length;
+                  const duration =
+                    numberOfDays === 1
+                      ? `${numberOfDays} day`
+                      : `${numberOfDays} days`;
+
                   return (
                     <StageRaceListGroupItem
-                      duration={(stageRace.date, "days")}
-                      key={stageRace.id}
-                      id={Number(stageRace.id)}
-                      date={stageRace.date}
+                      duration={duration}
+                      key={index}
+                      id={index + 1}
+                      date={`${date}`}
                       name={stageRace.name}
                       onDelete={() => deleteRace(Number(stageRace.id))}
                     />
@@ -174,6 +186,24 @@ const App = () => {
               id="stage-race-name"
               type="text"
               placeholder="Enter stage race name"
+              value={text}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setText(e.target.value)
+              }
+            />
+            <FormInputGroup
+              id="stage-race-name"
+              type="text"
+              label="Name"
+              value={text}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setText(e.target.value)
+              }
+            />
+            <FormInputGroup
+              id="stage-race-name"
+              type="date"
+              label="Date"
               value={text}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setText(e.target.value)
