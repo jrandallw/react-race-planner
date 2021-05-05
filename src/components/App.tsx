@@ -1,202 +1,172 @@
 import moment from "moment";
-import { useEffect, useState } from "react";
-
+import { useEffect, useReducer, useState } from "react";
 import { addStageRace, deleteStageRace, getStageRaces } from "../api";
-import { IProvisionalStageRace, IStage, IStageRace } from "../types";
+import { IStage, IStageRace } from "../types";
 import {
   ButtonWrapper,
   Container,
   Modal,
+  LoadingSpinner,
   PrimaryButton,
   FormInputGroup,
   SecondaryOutlineButton,
   DangerOutlineButton,
   SuccessOutlineButton,
-  LoadingSpinner,
   StageRaceFormStageListGroup,
   StageRaceListGroupItem,
   ErrorOverlay,
+  StageRaceFormTotals,
 } from "./shared";
+const initialState = {
+  loading: true,
+  error: false,
+  errorMessage: "",
+  stageRaces: [],
+};
+const ACTIONS = {
+  FETCH_SUCCESS: "fetch-success",
+  FETCH_ERROR: "fetch-error",
+  ADD_STAGE_RACE: "add-stage-race",
+  ADD_STAGE_RACE_ERROR: "add-stage-race-error",
+  DELETE_STAGE_RACE: "delete-stage-race",
+  DELETE_STAGE_RACE_ERROR: "delete-stage-race-error",
+  CLEAR_ERROR: "clear-error",
+};
+type State = {
+  loading: boolean;
+  error: boolean;
+  errorMessage: string;
+  stageRaces: any;
+};
 
-const initialStageRaceState = {
-  name: "",
-  id: "",
-  stages: [] as any,
+const reducer = (state: State, action: Record<string, unknown>) => {
+  switch (action.type) {
+    case ACTIONS.FETCH_SUCCESS:
+      return {
+        loading: false,
+        error: false,
+        stageRaces: action.payload,
+        errorMessage: "",
+      };
+    case ACTIONS.FETCH_ERROR:
+      return {
+        loading: false,
+        error: true,
+        stageRaces: [],
+        errorMessage: "Error loading stage races",
+      };
+    case ACTIONS.ADD_STAGE_RACE:
+      return {
+        ...state,
+        stages: [...state.stageRaces, { name: action.name, date: action.date }],
+      };
+    case ACTIONS.ADD_STAGE_RACE_ERROR:
+      return {
+        ...state,
+        errorMessage: "Error adding stage race",
+      };
+    case ACTIONS.DELETE_STAGE_RACE:
+      return {
+        ...state,
+      };
+    case ACTIONS.DELETE_STAGE_RACE_ERROR:
+      return {
+        ...state,
+        errorMessage: "Error deleting stage race",
+      };
+    case ACTIONS.CLEAR_ERROR:
+      return {
+        ...state,
+        error: false,
+      };
+    default:
+      return state;
+  }
 };
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
   const [addStages, setAddStages] = useState(false);
-  const [stageRaceData, setStageRaceData] = useState<IStageRace[]>([]);
-  const [newStageRace, setNewStageRace] = useState(initialStageRaceState);
-  const [newStage, setNewStage] = useState({ name: "", date: "", id: "" });
+  const [state, dispatch] = useReducer(reducer, initialState);
   const [text, setText] = useState("");
 
-  let errorMessage = "";
-
-  async function fetchStageRaces() {
-    setHasError(false);
-    setIsLoading(true);
+  const fetchStageRaces = async () => {
     try {
-      await getStageRaces().then(function (response: IStageRace[]) {
-        setStageRaceData(response);
+      await getStageRaces().then((response: IStageRace[]) => {
+        dispatch({ type: ACTIONS.FETCH_SUCCESS, payload: response });
       });
     } catch (error) {
-      setHasError(true);
-      errorMessage = "Error loading stage races";
+      dispatch({ type: ACTIONS.FETCH_ERROR });
     }
-    setIsLoading(false);
-  }
-
-  const handleAddStageRace = async (
-    provisionalStageRace: IProvisionalStageRace
-  ) => {
-    try {
-      await addStageRace(provisionalStageRace).then(() => {
-        setNewStageRace({ ...newStageRace, name: text });
-        setAddStages(true);
-      });
-    } catch (error) {
-      setHasError(true);
-      errorMessage = "Error adding stage race";
-    }
-    setIsLoading(false);
   };
 
-  const handleDeleteStageRace = async (id: number) => {
+  const addNewStageRace = async () => {
+    const provisionalStageRace = {
+      name: text,
+      stages: [],
+    };
+    try {
+      await addStageRace(provisionalStageRace).then(() => {
+        setAddStages(true);
+        setText("");
+      });
+    } catch (error) {
+      dispatch({ type: ACTIONS.ADD_STAGE_RACE_ERROR });
+    }
+  };
+
+  const deleteRace = async (id: number) => {
     try {
       await deleteStageRace(id).then(() => fetchStageRaces());
     } catch (error) {
-      setHasError(true);
-      errorMessage = "Error deleting stage race";
+      dispatch({ type: ACTIONS.DELETE_STAGE_RACE_ERROR });
     }
   };
 
   useEffect(() => {
     fetchStageRaces();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleAdd = (newStage: any) => {
-    setNewStageRace({ ...newStageRace, stages: newStage });
-    handleAddStageRace(newStageRace);
-  };
-
-  console.log(newStage);
-  
   return (
     <Container>
       <h1 className="mb-3">Stage Races</h1>
-      {hasError ? (
+      {state.error ? (
         <ErrorOverlay
-          error={errorMessage}
-          clearError={() => setHasError(false)}
+          error={state.errorMessage}
+          clearError={() => dispatch({ type: ACTIONS.CLEAR_ERROR })}
         />
       ) : null}
-      {isLoading ? (
+      {state.loading ? (
         <LoadingSpinner />
       ) : (
         <>
           <StageRaceFormStageListGroup>
-            {stageRaceData.length === 0
+            {state.stageRaces.length === 0
               ? "No stage races"
-              : stageRaceData.map((stageRace: IStageRace) => {
+              : state.stageRaces.map((stageRace: any, index: number) => {
                   const dates = stageRace.stages.map((stage: IStage) =>
                     moment(stage.date)
                   );
+                  const date = moment.min(dates).format("YYYY-MM-DD");
+                  const numberOfDays = dates.length;
+                  const duration =
+                    numberOfDays === 1
+                      ? `${numberOfDays} day`
+                      : `${numberOfDays} days`;
 
                   return (
-                    <>
-                      <StageRaceListGroupItem
-                        duration={String(dates.length)}
-                        key={stageRace.id}
-                        id={stageRace.id}
-                        date={String(moment.min(dates).format("YYYY-MM-DD"))}
-                        name={stageRace.name}
-                        onDelete={() => handleDeleteStageRace(stageRace.id)}
-                      />
-
-                      <Modal isOpen={isOpen}>
-                        {!addStages ? (
-                          <>
-                            <h1>Add Stage Race</h1>
-                            <FormInputGroup
-                              id="stage-race-name"
-                              type="text"
-                              placeholder="Enter stage race name"
-                              onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                              ) => setText(e.target.value)}
-                            />
-
-                            <ButtonWrapper>
-                              <SecondaryOutlineButton
-                                disabled={!text}
-                                onClick={() => setAddStages(true)}
-                              >
-                                Add Stage
-                              </SecondaryOutlineButton>
-                              <SuccessOutlineButton onClick={() => null}>
-                                Save
-                              </SuccessOutlineButton>
-                              <DangerOutlineButton
-                                onClick={() => setIsOpen(false)}
-                              >
-                                Cancel
-                              </DangerOutlineButton>
-                            </ButtonWrapper>
-                          </>
-                        ) : (
-                          <>
-                            <h1>Add Stage</h1>
-                            <FormInputGroup
-                              id="stage-name"
-                              type="text"
-                              label="Name"
-                              onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                              ) =>
-                                setNewStage({
-                                  ...newStage,
-                                  name: e.target.value,
-                                })
-                              }
-                            />
-                            <FormInputGroup
-                              id="stage-date"
-                              type="date"
-                              label="Date"
-                              onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                              ) =>
-                                setNewStage({
-                                  ...newStage,
-                                  date: e.target.value,
-                                })
-                              }
-                            />
-
-                            <ButtonWrapper>
-                              <SuccessOutlineButton
-                                onClick={() => handleAdd(newStage)}
-                              >
-                                Save
-                              </SuccessOutlineButton>
-                              <DangerOutlineButton
-                                onClick={() => setIsOpen(false)}
-                              >
-                                Cancel
-                              </DangerOutlineButton>
-                            </ButtonWrapper>
-                          </>
-                        )}
-                      </Modal>
-                    </>
+                    <StageRaceListGroupItem
+                      duration={duration}
+                      key={index}
+                      id={index + 1}
+                      date={`${date}`}
+                      name={stageRace.name}
+                      onDelete={() => deleteRace(Number(stageRace.id))}
+                    />
                   );
                 })}
           </StageRaceFormStageListGroup>
+
           <ButtonWrapper>
             <PrimaryButton onClick={() => setIsOpen(true)}>
               Add Stage Race
@@ -204,6 +174,69 @@ const App = () => {
           </ButtonWrapper>
         </>
       )}
+
+      <Modal isOpen={isOpen}>
+        {!addStages ? (
+          <>
+            <h1>Add Stage Race</h1>
+            <FormInputGroup
+              id="stage-race-name"
+              type="text"
+              placeholder="Enter stage race name"
+              value={text}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setText(e.target.value)
+              }
+            />
+            <FormInputGroup
+              id="stage-race-name"
+              type="text"
+              label="Name"
+              value={text}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setText(e.target.value)
+              }
+            />
+            <FormInputGroup
+              id="stage-race-name"
+              type="date"
+              label="Date"
+              value={text}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setText(e.target.value)
+              }
+            />
+            <h3>Stages</h3>
+            <StageRaceFormTotals duration="6" />
+            <ButtonWrapper>
+              <SecondaryOutlineButton
+                disabled={!text}
+                onClick={addNewStageRace}
+              >
+                Add Stage
+              </SecondaryOutlineButton>
+              <SuccessOutlineButton disabled={!addStages}>
+                Save
+              </SuccessOutlineButton>
+              <DangerOutlineButton onClick={() => setIsOpen(false)}>
+                Cancel
+              </DangerOutlineButton>
+            </ButtonWrapper>
+          </>
+        ) : (
+          <>
+            <h1>Add Stage Race</h1>
+            <FormInputGroup id="name" type="text" label="Name" value="" />
+            <FormInputGroup id="date" type="date" label="Date" />
+            <ButtonWrapper>
+              <SuccessOutlineButton>Save</SuccessOutlineButton>
+              <DangerOutlineButton onClick={() => setIsOpen(false)}>
+                Cancel
+              </DangerOutlineButton>
+            </ButtonWrapper>
+          </>
+        )}
+      </Modal>
     </Container>
   );
 };
