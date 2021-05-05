@@ -16,25 +16,26 @@ import {
   StageRaceFormStageListGroup,
   StageRaceListGroupItem,
   ErrorOverlay,
-  StageRaceFormStageListGroupItem,
 } from "./shared";
+
+const initialStageRaceState = {
+  name: "",
+  id: "",
+  stages: [],
+};
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [stageRaceData, setStageRaceData] = useState<IStageRace[]>([]);
-  const [options, setOptions] = useState([]);
-  const [optionsData, setOptionsData] = useState({
-    name: "",
-    id: "",
-    date: "",
-  });
-  const [text, setText] = useState("");
   const [addStages, setAddStages] = useState(false);
+  const [stageRaceData, setStageRaceData] = useState<IStageRace[]>([]);
+  const [newStageRace, setNewStageRace] = useState(initialStageRaceState);
+  const [newStage, setNewStage] = useState({ name: "", date: "", id: "" });
+  const [text, setText] = useState("");
 
-  console.log(options);
-  console.log(optionsData);
+  console.log(newStageRace);
+
   let errorMessage = "";
 
   async function fetchStageRaces() {
@@ -56,7 +57,7 @@ const App = () => {
   ) => {
     try {
       await addStageRace(provisionalStageRace).then(() => {
-        fetchStageRaces();
+        setNewStageRace({ ...newStageRace, name: text });
         setAddStages(true);
       });
     } catch (error) {
@@ -80,6 +81,10 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleAdd = (newStage: any) => {
+    setNewStageRace({ ...newStageRace, stages: newStage });
+  };
+
   return (
     <Container>
       <h1 className="mb-3">Stage Races</h1>
@@ -96,30 +101,18 @@ const App = () => {
           <StageRaceFormStageListGroup>
             {stageRaceData.length === 0
               ? "No stage races"
-              : stageRaceData.map((stageRace: any, index: number) => {
+              : stageRaceData.map((stageRace: IStageRace) => {
                   const dates = stageRace.stages.map((stage: IStage) =>
                     moment(stage.date)
                   );
-                  const date = moment.min(dates).format("YYYY-MM-DD");
-                  const numberOfDays = dates.length;
-                  const duration = numberOfDays === 1 ? " day" : " days";
-
-                  const handleAddStage = (option: any) => {
-                    const list = [...stageRace.stages, option];
-                    setOptions(list as any);
-                    setAddStages(false);
-                    return {
-                      list,
-                    };
-                  };
 
                   return (
                     <>
                       <StageRaceListGroupItem
-                        duration={numberOfDays + duration}
+                        duration={String(dates.length)}
                         key={stageRace.id}
                         id={stageRace.id}
-                        date={String(date)}
+                        date={String(moment.min(dates).format("YYYY-MM-DD"))}
                         name={stageRace.name}
                         onDelete={() => handleDeleteStageRace(stageRace.id)}
                       />
@@ -137,16 +130,6 @@ const App = () => {
                               ) => setText(e.target.value)}
                             />
 
-                            {stageRace.stages.map((option: any) => {
-                              return (
-                                <StageRaceFormStageListGroupItem
-                                  id={option.id}
-                                  date={option.date}
-                                  name={option.name}
-                                  onDelete={() => null}
-                                />
-                              );
-                            })}
                             <ButtonWrapper>
                               <SecondaryOutlineButton
                                 disabled={!text}
@@ -154,15 +137,7 @@ const App = () => {
                               >
                                 Add Stage
                               </SecondaryOutlineButton>
-                              <SuccessOutlineButton
-                                onClick={() =>
-                                  handleAddStage({
-                                    name: optionsData.name,
-                                    date: optionsData.date,
-                                    id: "",
-                                  })
-                                }
-                              >
+                              <SuccessOutlineButton onClick={() => null}>
                                 Save
                               </SuccessOutlineButton>
                               <DangerOutlineButton
@@ -176,38 +151,35 @@ const App = () => {
                           <>
                             <h1>Add Stage</h1>
                             <FormInputGroup
-                              id="stage-race-name"
+                              id="stage-name"
                               type="text"
                               label="Name"
                               onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                               ) =>
-                                setOptionsData({
-                                  ...optionsData,
+                                setNewStage({
+                                  ...newStage,
                                   name: e.target.value,
                                 })
                               }
                             />
                             <FormInputGroup
-                              id="stage-race-name"
+                              id="stage-date"
                               type="date"
                               label="Date"
                               onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                               ) =>
-                                setOptionsData({
-                                  ...optionsData,
+                                setNewStage({
+                                  ...newStage,
                                   date: e.target.value,
                                 })
                               }
                             />
+
                             <ButtonWrapper>
                               <SuccessOutlineButton
-                                onClick={() =>
-                                  handleAddStage({
-                                    name: text,
-                                  })
-                                }
+                                onClick={() => handleAdd(newStage)}
                               >
                                 Save
                               </SuccessOutlineButton>
