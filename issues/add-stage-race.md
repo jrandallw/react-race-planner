@@ -6,10 +6,10 @@
 
 - Modal "Add Stage Race" form:
 
-  - "Add Stage Race" form renders by default. DONE
-  - "Add Stage" button is disabled without a stage race name. DONE
+  - "Add Stage Race" form renders by default.
+  - "Add Stage" button is disabled without a stage race name.
   - "Save" button is disabled without at least one stage.
-  - Clicking "Cancel" closes modal. DONE
+  - Clicking "Cancel" closes modal.
 
   ![Blank "Add Stage" Race form](./screenshots/add-stage-race/1.png)
 

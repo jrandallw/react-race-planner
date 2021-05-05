@@ -8,7 +8,7 @@ export const StageRaceListGroup = styled.div.attrs({
 interface IStageRaceListGroupItemProps {
   id: number;
   name: string;
-  date: string; // earliest stage date 
+  date: string; // earliest stage date
   duration: string;
   onDelete: () => void;
 }
