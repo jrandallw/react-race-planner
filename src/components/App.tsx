@@ -21,7 +21,7 @@ import {
 const initialStageRaceState = {
   name: "",
   id: "",
-  stages: [],
+  stages: [] as any,
 };
 
 const App = () => {
@@ -33,8 +33,6 @@ const App = () => {
   const [newStageRace, setNewStageRace] = useState(initialStageRaceState);
   const [newStage, setNewStage] = useState({ name: "", date: "", id: "" });
   const [text, setText] = useState("");
-
-  console.log(newStageRace);
 
   let errorMessage = "";
 
@@ -81,8 +79,11 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  console.log(newStageRace.stages)
+
   const handleAdd = (newStage: any) => {
     setNewStageRace({ ...newStageRace, stages: newStage });
+    handleAddStageRace(newStageRace);
   };
 
   return (
