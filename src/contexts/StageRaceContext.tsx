@@ -3,7 +3,7 @@ import { getStageRaces } from "../api";
 import { IStageRace } from "../types";
 
 interface IStageRaceContext {
-  state: any;
+  state: State;
   dispatch: any;
 }
 
@@ -16,7 +16,7 @@ const initialState = {
   errorMessage: "",
 };
 
-const ACTIONS = {
+export const ACTIONS = {
   FETCH_SUCCESS: "fetch-success",
   FETCH_ERROR: "fetch-error",
   ADD_STAGE_RACE: "add-stage-race",
@@ -102,4 +102,4 @@ export const StageRaceProvider: React.FC = ({ children }) => {
   );
 };
 
-export const useStore = () => useContext(StageRaceContext);
+export const useStages = () => useContext(StageRaceContext);
