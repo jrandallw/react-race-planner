@@ -16,6 +16,7 @@ import {
   StageRaceFormStageListGroup,
   StageRaceListGroupItem,
   ErrorOverlay,
+  StageRaceFormStageListGroupItem,
 } from "./shared";
 
 const App = () => {
@@ -23,8 +24,17 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [stageRaceData, setStageRaceData] = useState<IStageRace[]>([]);
+  const [options, setOptions] = useState([]);
+  const [optionsData, setOptionsData] = useState({
+    name: "",
+    id: "",
+    date: "",
+  });
   const [text, setText] = useState("");
+  const [addStages, setAddStages] = useState(false);
 
+  console.log(options);
+  console.log(optionsData);
   let errorMessage = "";
 
   async function fetchStageRaces() {
@@ -41,20 +51,20 @@ const App = () => {
     setIsLoading(false);
   }
 
-  async function handleAddStageRace(
+  const handleAddStageRace = async (
     provisionalStageRace: IProvisionalStageRace
-  ) {
+  ) => {
     try {
       await addStageRace(provisionalStageRace).then(() => {
         fetchStageRaces();
-        setIsOpen(false);
+        setAddStages(true);
       });
     } catch (error) {
       setHasError(true);
       errorMessage = "Error adding stage race";
     }
     setIsLoading(false);
-  }
+  };
 
   const handleDeleteStageRace = async (id: number) => {
     try {
@@ -94,6 +104,15 @@ const App = () => {
                   const numberOfDays = dates.length;
                   const duration = numberOfDays === 1 ? " day" : " days";
 
+                  const handleAddStage = (option: any) => {
+                    const list = [...stageRace.stages, option];
+                    setOptions(list as any);
+                    setAddStages(false);
+                    return {
+                      list,
+                    };
+                  };
+
                   return (
                     <>
                       <StageRaceListGroupItem
@@ -106,24 +125,100 @@ const App = () => {
                       />
 
                       <Modal isOpen={isOpen}>
-                        <h1>Add Stage Race</h1>
-                        <FormInputGroup
-                          id="stage-race-name"
-                          type="text"
-                          placeholder="Enter stage race name"
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setText(e.target.value)
-                          }
-                        />
-                        <ButtonWrapper>
-                          <SecondaryOutlineButton disabled={!text}>
-                            Add Stage
-                          </SecondaryOutlineButton>
-                          <SuccessOutlineButton>Save</SuccessOutlineButton>
-                          <DangerOutlineButton onClick={() => setIsOpen(false)}>
-                            Cancel
-                          </DangerOutlineButton>
-                        </ButtonWrapper>
+                        {!addStages ? (
+                          <>
+                            <h1>Add Stage Race</h1>
+                            <FormInputGroup
+                              id="stage-race-name"
+                              type="text"
+                              placeholder="Enter stage race name"
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) => setText(e.target.value)}
+                            />
+
+                            {stageRace.stages.map((option: any) => {
+                              return (
+                                <StageRaceFormStageListGroupItem
+                                  id={option.id}
+                                  date={option.date}
+                                  name={option.name}
+                                  onDelete={() => null}
+                                />
+                              );
+                            })}
+                            <ButtonWrapper>
+                              <SecondaryOutlineButton
+                                disabled={!text}
+                                onClick={() => setAddStages(true)}
+                              >
+                                Add Stage
+                              </SecondaryOutlineButton>
+                              <SuccessOutlineButton
+                                onClick={() =>
+                                  handleAddStage({
+                                    name: optionsData.name,
+                                    date: optionsData.date,
+                                    id: "",
+                                  })
+                                }
+                              >
+                                Save
+                              </SuccessOutlineButton>
+                              <DangerOutlineButton
+                                onClick={() => setIsOpen(false)}
+                              >
+                                Cancel
+                              </DangerOutlineButton>
+                            </ButtonWrapper>
+                          </>
+                        ) : (
+                          <>
+                            <h1>Add Stage</h1>
+                            <FormInputGroup
+                              id="stage-race-name"
+                              type="text"
+                              label="Name"
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) =>
+                                setOptionsData({
+                                  ...optionsData,
+                                  name: e.target.value,
+                                })
+                              }
+                            />
+                            <FormInputGroup
+                              id="stage-race-name"
+                              type="date"
+                              label="Date"
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) =>
+                                setOptionsData({
+                                  ...optionsData,
+                                  date: e.target.value,
+                                })
+                              }
+                            />
+                            <ButtonWrapper>
+                              <SuccessOutlineButton
+                                onClick={() =>
+                                  handleAddStage({
+                                    name: text,
+                                  })
+                                }
+                              >
+                                Save
+                              </SuccessOutlineButton>
+                              <DangerOutlineButton
+                                onClick={() => setIsOpen(false)}
+                              >
+                                Cancel
+                              </DangerOutlineButton>
+                            </ButtonWrapper>
+                          </>
+                        )}
                       </Modal>
                     </>
                   );
