@@ -44,38 +44,7 @@
     {
       "name": "",
       "id": 2,
-      "stages": {
-        "name": "Newer Stage Races",
-        "date": "2021-05-08",
-        "id": ""
-      }
-    },
-    {
-      "name": "Newer Stage Race",
-      "id": 3,
-      "stages": {
-        "name": "Newer Stage Races",
-        "date": "2021-05-08",
-        "id": ""
-      }
-    },
-    {
-      "name": "Newer Stage Race",
-      "id": 4,
-      "stages": {
-        "name": "Newer Stage Races",
-        "date": "2021-05-08",
-        "id": ""
-      }
-    },
-    {
-      "name": "Newer Stage Race",
-      "id": 5,
-      "stages": {
-        "name": "Newer Stage Races",
-        "date": "2021-05-08",
-        "id": ""
-      }
+      "stages": []
     }
   ]
 }

@@ -79,7 +79,7 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log(newStageRace.stages)
+  console.log(newStageRace.stages);
 
   const handleAdd = (newStage: any) => {
     setNewStageRace({ ...newStageRace, stages: newStage });
