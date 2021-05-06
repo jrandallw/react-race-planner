@@ -14,6 +14,7 @@ const initialState = {
   error: false,
   stageRaces: [],
   errorMessage: "",
+  addStages: false,
 };
 
 export const ACTIONS = {
@@ -21,6 +22,7 @@ export const ACTIONS = {
   FETCH_ERROR: "fetch-error",
   ADD_STAGE_RACE: "add-stage-race",
   ADD_STAGE_RACE_ERROR: "add-stage-race-error",
+  ADD_STAGES: "add-stages",
   DELETE_STAGE_RACE: "delete-stage-race",
   DELETE_STAGE_RACE_ERROR: "delete-stage-race-error",
   CLEAR_ERROR: "clear-error",
@@ -29,30 +31,28 @@ export const ACTIONS = {
 type State = {
   loading: boolean;
   error: boolean;
+  addStages: boolean;
   errorMessage: string;
   stageRaces: any;
 };
 
-const reducer = (state: State, action: Record<string, unknown>) => {
+const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
   switch (action.type) {
     case ACTIONS.FETCH_SUCCESS:
       return {
+        ...state,
         loading: false,
-        error: false,
         stageRaces: action.payload,
-        errorMessage: "",
       };
     case ACTIONS.FETCH_ERROR:
       return {
-        loading: false,
+        ...state,
         error: true,
-        stageRaces: [],
         errorMessage: "Error loading stage races",
       };
     case ACTIONS.ADD_STAGE_RACE:
       return {
         ...state,
-        stages: [...state.stageRaces, { name: action.name, date: action.date }],
       };
     case ACTIONS.ADD_STAGE_RACE_ERROR:
       return {
@@ -73,13 +73,19 @@ const reducer = (state: State, action: Record<string, unknown>) => {
         ...state,
         error: false,
       };
+    case ACTIONS.ADD_STAGES:
+      return {
+        ...state,
+        //stageRaces: [...state.stageRaces, { name: action.name }],
+        addStages: true,
+      };
     default:
       return state;
   }
 };
 
 export const StageRaceProvider: React.FC = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(stageRaceReducer, initialState);
 
   const fetchStageRaces = async () => {
     try {

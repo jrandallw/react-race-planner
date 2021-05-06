@@ -1,5 +1,8 @@
+import moment from "moment";
 import { useState } from "react";
+import { addStageRace } from "../api";
 import { ACTIONS, useStages } from "../contexts";
+import { IStage } from "../types";
 import {
   ButtonWrapper,
   Container,
@@ -18,8 +21,26 @@ import {
 const App = () => {
   const { state, dispatch } = useStages();
   const [isOpen, setIsOpen] = useState(false);
-  const [text, setText] = useState("");
-  const [addStages, setAddStages] = useState(false);
+  const [stageRaceName, setStageRaceName] = useState("");
+  const [stageName, setStageName] = useState("");
+  const [date, setDate] = useState("");
+
+  const addNewStageRace = async () => {
+    const provisionalStageRace = {
+      name: stageRaceName,
+      stages: [],
+    };
+    console.log(provisionalStageRace);
+    try {
+      await addStageRace(provisionalStageRace).then(() =>
+        dispatch({
+          type: ACTIONS.ADD_STAGES,
+        })
+      );
+    } catch (error) {
+      dispatch({ type: ACTIONS.ADD_STAGE_RACE_ERROR });
+    }
+  };
 
   return (
     <Container>
@@ -30,14 +51,23 @@ const App = () => {
         <StageRaceListGroup>
           {state.stageRaces.length === 0
             ? "No stage races"
-            : state.stageRaces.map((stageRace: any, index: number) => {
+            : state.stageRaces.map((stageRace: any) => {
+                console.log(stageRace);
+                const dates = stageRace.stages.map((stage: IStage) =>
+                  moment(stage.date)
+                );
+
+                const date = moment.min(dates).format("YYYY-MM-DD");
+                const numberOfDays = dates.length;
+                const duration = numberOfDays === 1 ? " day" : " days";
+
                 return (
                   <StageRaceListGroupItem
                     name={stageRace.name}
-                    date="2021-05-05"
+                    date={date}
                     key={stageRace.id}
                     id={stageRace.id}
-                    duration="days"
+                    duration={numberOfDays + duration}
                     onDelete={() => null}
                   />
                 );
@@ -45,30 +75,39 @@ const App = () => {
         </StageRaceListGroup>
       )}
       <ButtonWrapper>
-        <PrimaryButton onClick={() => setIsOpen(true)}>
+        <PrimaryButton
+          onClick={() => {
+            setIsOpen(true);
+          }}
+        >
           Add Stage Race
         </PrimaryButton>
       </ButtonWrapper>
       <Modal isOpen={isOpen}>
-        {!addStages ? (
+        {!state.addStages ? (
           <>
             <h1 className="mb-3">Add Stage Race</h1>
             <FormInputGroup
               id="1"
               placeholder="Enter stage race name"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+              value={stageRaceName}
+              onChange={(e) => setStageRaceName(e.target.value)}
             />
+            <h3 className="mb-1">Stages</h3>
             <p>No stages</p>
-            <p>0 days</p>
+            <p>
+              <span className="font-weight-bold">Duration:</span> 0 days
+            </p>
             <ButtonWrapper>
               <SecondaryOutlineButton
-                disabled={!text}
-                onClick={() => setAddStages(true)}
+                disabled={!stageRaceName}
+                onClick={addNewStageRace}
               >
                 Add Stage
               </SecondaryOutlineButton>
-              <SuccessOutlineButton disabled>Save</SuccessOutlineButton>
+              <SuccessOutlineButton onClick={() => null}>
+                Save
+              </SuccessOutlineButton>
               <DangerOutlineButton onClick={() => setIsOpen(false)}>
                 Cancel
               </DangerOutlineButton>
@@ -81,18 +120,29 @@ const App = () => {
               id="1"
               label="Name"
               type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+              value={stageName}
+              onChange={(e) => setStageName(e.target.value)}
             />
             <FormInputGroup
               id="1"
               label="Date"
               type="date"
-              onChange={(e) => setText(e.target.value)}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
             />
 
             <ButtonWrapper>
-              <SuccessOutlineButton disabled>Save</SuccessOutlineButton>
+              <SuccessOutlineButton
+                onClick={() =>
+                  dispatch({
+                    type: ACTIONS.ADD_STAGE_RACE,
+                    name: stageName,
+                    date: date,
+                  })
+                }
+              >
+                Save
+              </SuccessOutlineButton>
               <DangerOutlineButton onClick={() => setIsOpen(false)}>
                 Cancel
               </DangerOutlineButton>
