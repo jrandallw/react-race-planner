@@ -24,15 +24,33 @@ const App = () => {
   const [stageRaceName, setStageRaceName] = useState("");
   const [stageName, setStageName] = useState("");
   const [date, setDate] = useState("");
+  const [newStage, setNewStage] = useState({
+    id: "",
+    name: "Stage Name",
+    date: "2012-10-15",
+  });
 
-  const addNewStageRace = async () => {
-    const provisionalStageRace = {
-      name: stageRaceName,
-      stages: [],
-    };
-    console.log(provisionalStageRace);
+  const [newStageRace, setNewStageRace] = useState({
+    id: "",
+    name: "",
+    stages: [newStage],
+  });
+
+  const handleAddNewStageRace = () => {
+    setNewStageRace({ ...newStageRace, name: stageRaceName });
+    dispatch({
+      type: ACTIONS.ADD_STAGES,
+    });
+  };
+
+  const handleAddStage = () => {
+    console.log(newStageRace);
+    setNewStage({ ...newStage });
+  };
+
+  const handleAddStageRace = async () => {
     try {
-      await addStageRace(provisionalStageRace).then(() =>
+      await addStageRace(newStageRace).then(() =>
         dispatch({
           type: ACTIONS.ADD_STAGES,
         })
@@ -52,7 +70,6 @@ const App = () => {
           {state.stageRaces.length === 0
             ? "No stage races"
             : state.stageRaces.map((stageRace: any) => {
-                console.log(stageRace);
                 const dates = stageRace.stages.map((stage: IStage) =>
                   moment(stage.date)
                 );
@@ -101,7 +118,7 @@ const App = () => {
             <ButtonWrapper>
               <SecondaryOutlineButton
                 disabled={!stageRaceName}
-                onClick={addNewStageRace}
+                onClick={handleAddStage}
               >
                 Add Stage
               </SecondaryOutlineButton>
@@ -121,27 +138,26 @@ const App = () => {
               label="Name"
               type="text"
               value={stageName}
-              onChange={(e) => setStageName(e.target.value)}
+              onChange={(e) => {
+                setStageName(e.target.value);
+              }}
             />
             <FormInputGroup
               id="1"
               label="Date"
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => {
+                setDate(e.target.value);
+              }}
             />
 
             <ButtonWrapper>
-              <SuccessOutlineButton
-                onClick={() =>
-                  dispatch({
-                    type: ACTIONS.ADD_STAGE_RACE,
-                    name: stageName,
-                    date: date,
-                  })
-                }
-              >
+              <SuccessOutlineButton onClick={handleAddStage}>
                 Save
+              </SuccessOutlineButton>
+              <SuccessOutlineButton onClick={handleAddStageRace}>
+                Test
               </SuccessOutlineButton>
               <DangerOutlineButton onClick={() => setIsOpen(false)}>
                 Cancel
