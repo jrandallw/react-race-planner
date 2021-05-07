@@ -58,6 +58,7 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
     case ACTIONS.ADD_STAGE_RACE_ERROR:
       return {
         ...state,
+        error: true,
         errorMessage: "Error adding stage race",
       };
     case ACTIONS.DELETE_STAGE_RACE:
@@ -68,6 +69,7 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
     case ACTIONS.DELETE_STAGE_RACE_ERROR:
       return {
         ...state,
+        error: true,
         errorMessage: "Error deleting stage race",
       };
     case ACTIONS.CLEAR_ERROR:

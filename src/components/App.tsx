@@ -2,6 +2,7 @@ import moment from "moment";
 import { useState } from "react";
 import { addStageRace, deleteStageRace } from "../api";
 import { ACTIONS, useStages } from "../contexts";
+import uniqid from "uniqid";
 
 import { IStage, IStageRace } from "../types";
 import {
@@ -24,7 +25,7 @@ import {
 
 const App = () => {
   const initialStageState = {
-    id: "",
+    id: uniqid(),
     name: "",
     date: "",
   };
@@ -171,7 +172,10 @@ const App = () => {
           <h3 className="mb-1">Stages</h3>
 
           {newStageRace.stages.length === 0 ? (
-            <p>No stages</p>
+            <>
+              <p>No stages</p>
+              <StageRaceFormTotals duration={"0 days"} />
+            </>
           ) : (
             <>
               <StageRaceFormStageListGroup>
@@ -189,7 +193,6 @@ const App = () => {
                   }
                 )}
               </StageRaceFormStageListGroup>
-
               <StageRaceFormTotals
                 duration={getDuration(newStageRace.stages)}
               />
@@ -203,12 +206,20 @@ const App = () => {
               Add Stage
             </SecondaryOutlineButton>
             <SuccessOutlineButton
-              disabled={newStageRace.stages.length === 0}
+              disabled={!newStageRace.stages.length}
               onClick={handleAddStageRace}
             >
               Save
             </SuccessOutlineButton>
-            <DangerOutlineButton onClick={() => setIsOpen(false)}>
+            <DangerOutlineButton
+              onClick={() => {
+                setNewStageRace({
+                  ...newStageRace,
+                  name: "",
+                });
+                setIsOpen(false);
+              }}
+            >
               Cancel
             </DangerOutlineButton>
           </ButtonWrapper>
@@ -239,7 +250,9 @@ const App = () => {
               Save
             </SuccessOutlineButton>
             <DangerOutlineButton
-              onClick={() => dispatch({ type: ACTIONS.ADD_STAGES })}
+              onClick={() => {
+                dispatch({ type: ACTIONS.ADD_STAGES });
+              }}
             >
               Cancel
             </DangerOutlineButton>
