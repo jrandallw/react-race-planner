@@ -4,22 +4,22 @@
 
 - Clicking "Add Stage Race" button opens the modal.
 
-- Modal "Add Stage Race" form:
+<!-- - Modal "Add Stage Race" form:
 
   - "Add Stage Race" form renders by default.
   - "Add Stage" button is disabled without a stage race name.
   - "Save" button is disabled without at least one stage.
-  - Clicking "Cancel" closes modal.
+  - Clicking "Cancel" closes modal. -->
 
-  ![Blank "Add Stage" Race form](./screenshots/add-stage-race/1.png)
+  <!-- ![Blank "Add Stage" Race form](./screenshots/add-stage-race/1.png) -->
 
-- Modal "Add Stage" form (after entering stage race name and clicking "Add Stage" button):
+<!-- - Modal "Add Stage" form (after entering stage race name and clicking "Add Stage" button):
 
   - "Add Stage" form renders.
   - "Save" button is disabled without name and date.
   - Clicking "Cancel" returns to "Add Stage Race" form without provisional stage.
 
-  ![Blank "Add Stage" form](./screenshots/add-stage-race/2.png)
+  ![Blank "Add Stage" form](./screenshots/add-stage-race/2.png) -->
 
 - Calls `POST "/stage-races"` with stage race data and handles success (after entering stage race name and adding three stages, but deleting one):
 

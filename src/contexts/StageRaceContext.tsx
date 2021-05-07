@@ -5,6 +5,7 @@ import { IStageRace } from "../types";
 interface IStageRaceContext {
   state: State;
   dispatch: any;
+  fetchStageRaces(): void;
 }
 
 const StageRaceContext = createContext({} as IStageRaceContext);
@@ -102,7 +103,7 @@ export const StageRaceProvider: React.FC = ({ children }) => {
   }, []);
 
   return (
-    <StageRaceContext.Provider value={{ state, dispatch }}>
+    <StageRaceContext.Provider value={{ state, dispatch, fetchStageRaces }}>
       {children}
     </StageRaceContext.Provider>
   );
