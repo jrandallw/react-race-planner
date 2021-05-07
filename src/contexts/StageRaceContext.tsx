@@ -62,6 +62,7 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
     case ACTIONS.DELETE_STAGE_RACE:
       return {
         ...state,
+        stageRaces: action.payload,
       };
     case ACTIONS.DELETE_STAGE_RACE_ERROR:
       return {
@@ -76,8 +77,7 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
     case ACTIONS.ADD_STAGES:
       return {
         ...state,
-        //stageRaces: [...state.stageRaces, { name: action.name }],
-        addStages: true,
+        addStages: !state.addStages,
       };
     default:
       return state;

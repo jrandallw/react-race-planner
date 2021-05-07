@@ -40,6 +40,49 @@
           "date": "2019-05-18"
         }
       ]
+    },
+    {
+      "id": 2,
+      "name": "Jesse",
+      "stages": [
+        {
+          "id": "",
+          "name": "",
+          "date": ""
+        },
+        {
+          "id": "kodo37qk",
+          "name": "Test",
+          "date": "2021-05-15"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Newer Stage Race",
+      "stages": [
+        {
+          "id": "kodo4psk",
+          "name": "Newer Stage",
+          "date": "2021-05-13"
+        },
+        {
+          "id": "kodo4usf",
+          "name": "Older Stage",
+          "date": "2021-05-12"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Jesse Winton",
+      "stages": [
+        {
+          "id": "kodocl70",
+          "name": "Jesse Winton",
+          "date": "2021-05-07"
+        }
+      ]
     }
   ]
 }
