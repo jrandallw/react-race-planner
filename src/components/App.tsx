@@ -25,7 +25,7 @@ import {
 
 const App = () => {
   const initialStageState = {
-    id: uniqid(),
+    id: "",
     name: "",
     date: "",
   };
@@ -95,7 +95,7 @@ const App = () => {
     }
   };
 
-  const getDuration = (items: any) => {
+  const getDuration = (items: IStage[]) => {
     const length = items.length;
     const duration = items.length === 1 ? " day" : " days";
 
@@ -183,8 +183,8 @@ const App = () => {
                   (stage: IStage, index: number) => {
                     return (
                       <StageRaceFormStageListGroupItem
-                        key={stage.id}
-                        id={stage.id}
+                        key={uniqid()}
+                        id={uniqid()}
                         date={stage.date}
                         name={stage.name}
                         onDelete={() => handleDeleteStage(index)}
