@@ -33,7 +33,6 @@ const App = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [newStage, setNewStage] = useState(initialStageState);
   const [newStageRace, setNewStageRace] = useState({
-    id: "",
     name: "",
     stages: [] as IStage[],
   });
@@ -56,6 +55,10 @@ const App = () => {
     setNewStageRace({
       ...newStageRace,
       stages: [...newStageRace.stages, newStageData],
+    });
+    setNewStage({
+      ...newStage,
+      id: String(uniqid()),
     });
     dispatch({
       type: ACTIONS.ADD_STAGES,
@@ -81,7 +84,7 @@ const App = () => {
         });
       });
     } catch (error) {
-      dispatch({ type: ACTIONS.ADD_STAGE_RACE_ERROR });
+      dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
     }
   };
 
@@ -91,10 +94,12 @@ const App = () => {
         fetchStageRaces();
       });
     } catch (error) {
-      dispatch({ type: ACTIONS.DELETE_STAGE_RACE_ERROR });
+      dispatch({
+        type: ACTIONS.HAS_ERROR,
+        message: "Error deleting stage race",
+      });
     }
   };
-
   const getDuration = (items: IStage[]) => {
     const length = items.length;
     const duration = items.length === 1 ? " day" : " days";
@@ -122,32 +127,35 @@ const App = () => {
       {state.loading ? (
         <LoadingSpinner />
       ) : (
-        <StageRaceListGroup>
-          {state.stageRaces.length === 0
-            ? "No stage races"
-            : state.stageRaces.map((stageRace: IStageRace) => {
-                return (
-                  <StageRaceListGroupItem
-                    name={stageRace.name}
-                    date={getEarliestDate(stageRace.stages)}
-                    key={stageRace.id}
-                    id={stageRace.id}
-                    duration={getDuration(stageRace.stages)}
-                    onDelete={() => handleDeleteStageRace(stageRace.id)}
-                  />
-                );
-              })}
-        </StageRaceListGroup>
+        <>
+          <StageRaceListGroup>
+            {state.stageRaces.length === 0
+              ? "No stage races"
+              : state.stageRaces.map((stageRace: IStageRace) => {
+                  return (
+                    <StageRaceListGroupItem
+                      name={stageRace.name}
+                      date={getEarliestDate(stageRace.stages)}
+                      key={stageRace.id}
+                      id={stageRace.id}
+                      duration={getDuration(stageRace.stages)}
+                      onDelete={() => handleDeleteStageRace(stageRace.id)}
+                    />
+                  );
+                })}
+          </StageRaceListGroup>
+
+          <ButtonWrapper>
+            <PrimaryButton
+              onClick={() => {
+                setIsOpen(true);
+              }}
+            >
+              Add Stage Race
+            </PrimaryButton>
+          </ButtonWrapper>
+        </>
       )}
-      <ButtonWrapper>
-        <PrimaryButton
-          onClick={() => {
-            setIsOpen(true);
-          }}
-        >
-          Add Stage Race
-        </PrimaryButton>
-      </ButtonWrapper>
       {state.error ? (
         <ErrorOverlay
           error={state.errorMessage}
@@ -159,7 +167,7 @@ const App = () => {
         <Modal isOpen={isOpen}>
           <h2 className="mb-3">Add Stage Race</h2>
           <FormInputGroup
-            id="1"
+            id="text-input-stage-name"
             placeholder="Enter stage race name"
             value={newStageRace.name}
             onChange={(e) =>
@@ -228,14 +236,14 @@ const App = () => {
         <Modal isOpen={isOpen}>
           <h2 className="mb-3">Add Stage</h2>
           <FormInputGroup
-            id="1"
+            id="text-input-name"
             label="Name"
             type="text"
             value={newStage.name}
             onChange={(e) => setNewStage({ ...newStage, name: e.target.value })}
           />
           <FormInputGroup
-            id="1"
+            id="text-input-date"
             label="Date"
             type="date"
             value={newStage.date}

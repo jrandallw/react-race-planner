@@ -40,33 +40,6 @@
           "date": "2019-05-18"
         }
       ]
-    },
-    {
-      "id": 2,
-      "name": "Test",
-      "stages": [
-        {
-          "id": "",
-          "name": "Stage One",
-          "date": "2010-05-11"
-        },
-        {
-          "id": "",
-          "name": "Jesse Winton2",
-          "date": "2021-05-20"
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "name": "Test",
-      "stages": [
-        {
-          "id": "",
-          "name": "Jesse",
-          "date": "2021-05-13"
-        }
-      ]
     }
   ]
 }

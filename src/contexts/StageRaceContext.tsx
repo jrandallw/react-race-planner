@@ -27,12 +27,10 @@ const initialState = {
 
 export const ACTIONS = {
   FETCH_SUCCESS: "fetch-success",
-  FETCH_ERROR: "fetch-error",
   ADD_STAGE_RACE: "add-stage-race",
-  ADD_STAGE_RACE_ERROR: "add-stage-race-error",
   ADD_STAGES: "add-stages",
   DELETE_STAGE_RACE: "delete-stage-race",
-  DELETE_STAGE_RACE_ERROR: "delete-stage-race-error",
+  HAS_ERROR: "has-error",
   CLEAR_ERROR: "clear-error",
 };
 
@@ -64,32 +62,20 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
         loading: false,
         stageRaces: action.payload,
       };
-    case ACTIONS.FETCH_ERROR:
-      return {
-        ...state,
-        error: true,
-        errorMessage: "Error loading stage races",
-      };
     case ACTIONS.ADD_STAGE_RACE:
       return {
         ...state,
-      };
-    case ACTIONS.ADD_STAGE_RACE_ERROR:
-      return {
-        ...state,
-        error: true,
-        errorMessage: "Error adding stage race",
       };
     case ACTIONS.DELETE_STAGE_RACE:
       return {
         ...state,
         stageRaces: action.payload,
       };
-    case ACTIONS.DELETE_STAGE_RACE_ERROR:
+    case ACTIONS.HAS_ERROR:
       return {
         ...state,
         error: true,
-        errorMessage: "Error deleting stage race",
+        errorMessage: String(action.message),
       };
     case ACTIONS.CLEAR_ERROR:
       return {
@@ -118,7 +104,10 @@ export const StageRaceProvider: React.FC = ({ children }) => {
         });
       });
     } catch (error) {
-      dispatch({ type: ACTIONS.FETCH_ERROR });
+      dispatch({
+        type: ACTIONS.HAS_ERROR,
+        message: "Error loading stage races",
+      });
     }
   }, []);
 
