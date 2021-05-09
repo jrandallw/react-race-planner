@@ -19,6 +19,7 @@ export const ACTIONS = {
   FETCH_SUCCESS: "fetch-success",
   ADD_STAGE_RACE: "add-stage-race",
   STAGES_FORM: "add-stages",
+  CLOSE_STAGES_FORM: "close-stages-form",
   DELETE_STAGE_RACE: "delete-stage-race",
   MODAL_OPEN: "modal-open",
   HAS_ERROR: "has-error",
@@ -68,6 +69,7 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
     case ACTIONS.ADD_STAGE_RACE:
       return {
         ...state,
+        stageRaces: action.payload
       };
     case ACTIONS.DELETE_STAGE_RACE:
       return {
@@ -90,6 +92,11 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
       return {
         ...state,
         addStages: !state.addStages,
+      };
+    case ACTIONS.CLOSE_STAGES_FORM:
+      return {
+        ...state,
+        addStages: false,
       };
     case ACTIONS.MODAL_OPEN:
       return {

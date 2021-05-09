@@ -55,10 +55,7 @@ const App = () => {
         dispatch({
           type: ACTIONS.MODAL_OPEN,
         });
-        dispatch({
-          type: ACTIONS.STAGES_FORM,
-        });
-        fetchStageRaces();
+       fetchStageRaces();
       });
     } catch (error) {
       dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
@@ -132,12 +129,13 @@ const App = () => {
           <StageRaceListGroup>
             {state.stageRaces.length === 0
               ? "No stage races"
-              : state.stageRaces.map((stageRace: IStageRace, index: number) => {
+              : state.stageRaces.map((stageRace: IStageRace) => {
+                  console.log(stageRace);
                   return (
                     <StageRaceListGroupItem
                       name={stageRace.name}
                       date={getEarliestDate(stageRace.stages)}
-                      key={stageRace.id}
+                      key={`${stageRace.name}-${stageRace.id}`}
                       id={stageRace.id}
                       duration={getDuration(stageRace.stages)}
                       onDelete={() => handleDeleteStageRace(stageRace.id)}
