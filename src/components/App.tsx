@@ -24,60 +24,41 @@ import {
 } from "./shared";
 
 const App = () => {
+  const { state, dispatch, fetchStageRaces } = useStages();
+
+  // initial state for stages within stage race
   const initialStageState = {
     id: "",
     name: "",
     date: "",
   };
-  const { state, dispatch, fetchStageRaces } = useStages();
-  const [isOpen, setIsOpen] = useState(false);
   const [newStage, setNewStage] = useState(initialStageState);
-  const [newStageRace, setNewStageRace] = useState({
+
+  // initial state for a new stage race
+  const initialStageRaceState = {
     name: "",
     stages: [] as IStage[],
-  });
+  };
+  const [newStageRace, setNewStageRace] = useState(initialStageRaceState);
 
-  const handleAddNewStageRace = () => {
+  const handleCreateNewStageRace = () => {
     setNewStageRace({ ...newStageRace, name: newStageRace.name });
     dispatch({
-      type: ACTIONS.ADD_STAGES,
-      stages: true,
+      type: ACTIONS.STAGES_FORM,
     });
     setNewStage(initialStageState);
-  };
-
-  const handleAddStage = () => {
-    const newStageData = {
-      id: uniqid(),
-      name: newStage.name,
-      date: newStage.date,
-    };
-    setNewStageRace({
-      ...newStageRace,
-      stages: [...newStageRace.stages, newStageData],
-    });
-    dispatch({
-      type: ACTIONS.ADD_STAGES,
-      stages: false,
-    });
-  };
-
-  const handleDeleteStage = (id: number) => {
-    newStageRace.stages.splice(id, 1);
-    setNewStageRace({
-      ...newStageRace,
-      stages: [...newStageRace.stages],
-    });
   };
 
   const handleAddStageRace = async () => {
     try {
       await addStageRace(newStageRace).then(() => {
-        setIsOpen(false);
-        fetchStageRaces();
         dispatch({
-          type: ACTIONS.ADD_STAGES,
+          type: ACTIONS.MODAL_OPEN,
         });
+        dispatch({
+          type: ACTIONS.STAGES_FORM,
+        });
+        fetchStageRaces();
       });
     } catch (error) {
       dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
@@ -96,9 +77,33 @@ const App = () => {
       });
     }
   };
+
+  const handleAddStage = () => {
+    const newStageData = {
+      id: uniqid(),
+      name: newStage.name,
+      date: newStage.date,
+    };
+    setNewStageRace({
+      ...newStageRace,
+      stages: [...newStageRace.stages, newStageData],
+    });
+    dispatch({
+      type: ACTIONS.STAGES_FORM,
+    });
+  };
+
+  const handleDeleteStage = (id: number) => {
+    const newStagesList = newStageRace.stages.filter((_, i) => i !== id);
+    setNewStageRace({
+      ...newStageRace,
+      stages: newStagesList,
+    });
+  };
+
   const getDuration = (items: IStage[]) => {
     const length = items.length;
-    const duration = items.length === 1 ? " day" : " days";
+    const duration = items.length === 1 ? "day" : "days";
 
     return `${length} ${duration}`;
   };
@@ -144,7 +149,9 @@ const App = () => {
           <ButtonWrapper>
             <PrimaryButton
               onClick={() => {
-                setIsOpen(true);
+                dispatch({
+                  type: ACTIONS.MODAL_OPEN,
+                });
               }}
             >
               Add Stage Race
@@ -160,7 +167,7 @@ const App = () => {
       ) : null}
 
       {!state.addStages ? (
-        <Modal isOpen={isOpen}>
+        <Modal isOpen={state.modalOpen}>
           <h2 className="mb-3">Add Stage Race</h2>
           <FormInputGroup
             id="text-input-stage-name"
@@ -187,8 +194,8 @@ const App = () => {
                   (stage: IStage, index: number) => {
                     return (
                       <StageRaceFormStageListGroupItem
-                        key={uniqid()}
-                        id={uniqid()}
+                        key={stage.id}
+                        id={stage.id}
                         date={stage.date}
                         name={stage.name}
                         onDelete={() => handleDeleteStage(index)}
@@ -205,7 +212,7 @@ const App = () => {
           <ButtonWrapper>
             <SecondaryOutlineButton
               disabled={!newStageRace.name}
-              onClick={handleAddNewStageRace}
+              onClick={handleCreateNewStageRace}
             >
               Add Stage
             </SecondaryOutlineButton>
@@ -221,7 +228,9 @@ const App = () => {
                   ...newStageRace,
                   name: "",
                 });
-                setIsOpen(false);
+                dispatch({
+                  type: ACTIONS.MODAL_OPEN,
+                });
               }}
             >
               Cancel
@@ -229,7 +238,7 @@ const App = () => {
           </ButtonWrapper>
         </Modal>
       ) : (
-        <Modal isOpen={isOpen}>
+        <Modal isOpen={state.modalOpen}>
           <h2 className="mb-3">Add Stage</h2>
           <FormInputGroup
             id="text-input-name"
@@ -255,7 +264,7 @@ const App = () => {
             </SuccessOutlineButton>
             <DangerOutlineButton
               onClick={() => {
-                dispatch({ type: ACTIONS.ADD_STAGES });
+                dispatch({ type: ACTIONS.STAGES_FORM });
               }}
             >
               Cancel

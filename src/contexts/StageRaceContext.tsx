@@ -15,7 +15,15 @@ interface IStageRaceContext {
   fetchStageRaces(): void;
 }
 
-const StageRaceContext = createContext({} as IStageRaceContext);
+export const ACTIONS = {
+  FETCH_SUCCESS: "fetch-success",
+  ADD_STAGE_RACE: "add-stage-race",
+  STAGES_FORM: "add-stages",
+  DELETE_STAGE_RACE: "delete-stage-race",
+  MODAL_OPEN: "modal-open",
+  HAS_ERROR: "has-error",
+  CLEAR_ERROR: "clear-error",
+};
 
 const initialState = {
   loading: true,
@@ -23,15 +31,7 @@ const initialState = {
   stageRaces: [],
   errorMessage: "",
   addStages: false,
-};
-
-export const ACTIONS = {
-  FETCH_SUCCESS: "fetch-success",
-  ADD_STAGE_RACE: "add-stage-race",
-  ADD_STAGES: "add-stages",
-  DELETE_STAGE_RACE: "delete-stage-race",
-  HAS_ERROR: "has-error",
-  CLEAR_ERROR: "clear-error",
+  modalOpen: false,
 };
 
 type State = {
@@ -39,19 +39,22 @@ type State = {
   error: boolean;
   addStages: boolean;
   errorMessage: string;
+  modalOpen: boolean;
   stageRaces: any;
 };
 
-const sortStageRacesByDate = (items: any) => {
-  return items.sort((first: any, second: any) => {
-    if (moment(first.stages.date).isSame(second.stages.date)) {
-      return -1;
-    } else if (moment(first.stages.date).isBefore(second.stages.date)) {
-      return -1;
-    } else {
-      return 1;
+const sortStageRacesByDate = (items: any[]) => {
+  return items.sort(
+    (first: Record<string, any>, second: Record<string, any>) => {
+      if (moment(first.stages.date).isSame(second.stages.date)) {
+        return -1;
+      } else if (moment(first.stages.date).isBefore(second.stages.date)) {
+        return -1;
+      } else {
+        return 1;
+      }
     }
-  });
+  );
 };
 
 const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
@@ -81,16 +84,24 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
       return {
         ...state,
         error: false,
+        loading: false,
       };
-    case ACTIONS.ADD_STAGES:
+    case ACTIONS.STAGES_FORM:
       return {
         ...state,
         addStages: !state.addStages,
+      };
+    case ACTIONS.MODAL_OPEN:
+      return {
+        ...state,
+        modalOpen: !state.modalOpen,
       };
     default:
       return state;
   }
 };
+
+const StageRaceContext = createContext({} as IStageRaceContext);
 
 export const StageRaceProvider: React.FC = ({ children }) => {
   const [state, dispatch] = useReducer(stageRaceReducer, initialState);
