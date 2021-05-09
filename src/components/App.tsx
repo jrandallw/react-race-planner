@@ -48,17 +48,13 @@ const App = () => {
 
   const handleAddStage = () => {
     const newStageData = {
-      id: "",
+      id: uniqid(),
       name: newStage.name,
       date: newStage.date,
     };
     setNewStageRace({
       ...newStageRace,
       stages: [...newStageRace.stages, newStageData],
-    });
-    setNewStage({
-      ...newStage,
-      id: String(uniqid()),
     });
     dispatch({
       type: ACTIONS.ADD_STAGES,
@@ -131,7 +127,7 @@ const App = () => {
           <StageRaceListGroup>
             {state.stageRaces.length === 0
               ? "No stage races"
-              : state.stageRaces.map((stageRace: IStageRace) => {
+              : state.stageRaces.map((stageRace: IStageRace, index: number) => {
                   return (
                     <StageRaceListGroupItem
                       name={stageRace.name}
