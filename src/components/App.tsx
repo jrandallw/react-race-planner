@@ -27,26 +27,23 @@ const App = () => {
   const { state, dispatch, fetchStageRaces } = useStages();
 
   // initial state for stages within stage race
-  const initialStageState = {
+  const [newStage, setNewStage] = useState({
     id: "",
     name: "",
     date: "",
-  };
-  const [newStage, setNewStage] = useState(initialStageState);
+  });
 
   // initial state for a new stage race
-  const initialStageRaceState = {
+  const [newStageRace, setNewStageRace] = useState({
     name: "",
     stages: [] as IStage[],
-  };
-  const [newStageRace, setNewStageRace] = useState(initialStageRaceState);
+  });
 
   const handleCreateNewStageRace = () => {
     setNewStageRace({ ...newStageRace, name: newStageRace.name });
     dispatch({
       type: ACTIONS.STAGES_FORM,
     });
-    setNewStage(initialStageState);
   };
 
   const handleAddStageRace = async () => {
@@ -55,7 +52,7 @@ const App = () => {
         dispatch({
           type: ACTIONS.MODAL_OPEN,
         });
-       fetchStageRaces();
+        fetchStageRaces();
       });
     } catch (error) {
       dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
@@ -130,7 +127,6 @@ const App = () => {
             {state.stageRaces.length === 0
               ? "No stage races"
               : state.stageRaces.map((stageRace: IStageRace) => {
-                  console.log(stageRace);
                   return (
                     <StageRaceListGroupItem
                       name={stageRace.name}
