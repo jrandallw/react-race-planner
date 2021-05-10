@@ -1,26 +1,30 @@
 import moment from "moment";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-} from "react";
-import { getStageRaces } from "../api";
+import { createContext, useContext, useEffect, useReducer } from "react";
+import { deleteStageRace, getStageRaces } from "../api";
 import { IStageRace } from "../types";
+
+type State = {
+  loading: boolean;
+  error: boolean;
+  addStages: boolean;
+  errorMessage: string;
+  modalOpen: boolean;
+  stageRaces: IStageRace[];
+};
 
 interface IStageRaceContext {
   state: State;
   dispatch: any;
-  fetchStageRaces(): void;
 }
 
 export const ACTIONS = {
   FETCH_SUCCESS: "fetch-success",
-  STAGES_FORM: "add-stages",
+  ADD_STAGE_RACE: "add-stage-race",
   DELETE_STAGE_RACE: "delete-stage-race",
+  STAGES_FORM: "add-stages",
   MODAL_OPEN: "modal-open",
   HAS_ERROR: "has-error",
+  IS_LOADING: "is-loading",
   CLEAR_ERROR: "clear-error",
 };
 
@@ -31,15 +35,6 @@ const initialState = {
   errorMessage: "",
   addStages: false,
   modalOpen: false,
-};
-
-type State = {
-  loading: boolean;
-  error: boolean;
-  addStages: boolean;
-  errorMessage: string;
-  modalOpen: boolean;
-  stageRaces: any;
 };
 
 const sortStageRacesByDate = (items: any[]) => {
@@ -56,7 +51,7 @@ const sortStageRacesByDate = (items: any[]) => {
   );
 };
 
-const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
+const stageRaceReducer = (state: State, action: any) => {
   switch (action.type) {
     case ACTIONS.FETCH_SUCCESS:
       return {
@@ -64,22 +59,30 @@ const stageRaceReducer = (state: State, action: Record<string, unknown>) => {
         loading: false,
         stageRaces: action.payload,
       };
+    case ACTIONS.ADD_STAGE_RACE:
+      return {
+        ...state,
+        modalOpen: false,
+        stageRaces: [...state.stageRaces, action.payload],
+      };
     case ACTIONS.DELETE_STAGE_RACE:
       return {
         ...state,
-        stageRaces: action.payload,
+        stageRaces: state.stageRaces.map(
+          (index: any) => (index = action.id ? deleteStageRace(index) : null)
+        ),
       };
     case ACTIONS.HAS_ERROR:
       return {
         ...state,
         error: true,
+        loading: false,
         errorMessage: String(action.message),
       };
     case ACTIONS.CLEAR_ERROR:
       return {
         ...state,
         error: false,
-        loading: false,
       };
     case ACTIONS.STAGES_FORM:
       return {
@@ -101,10 +104,11 @@ const StageRaceContext = createContext({} as IStageRaceContext);
 export const StageRaceProvider: React.FC = ({ children }) => {
   const [state, dispatch] = useReducer(stageRaceReducer, initialState);
 
-  const fetchStageRaces = useCallback(async () => {
+  const fetchStageRaces = async () => {
     try {
       await getStageRaces().then((response: IStageRace[]) => {
         dispatch({
+          loading: true,
           type: ACTIONS.FETCH_SUCCESS,
           payload: sortStageRacesByDate(response),
         });
@@ -115,17 +119,17 @@ export const StageRaceProvider: React.FC = ({ children }) => {
         message: "Error loading stage races",
       });
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchStageRaces();
-  }, [fetchStageRaces]);
+  }, []);
 
   return (
-    <StageRaceContext.Provider value={{ state, dispatch, fetchStageRaces }}>
+    <StageRaceContext.Provider value={{ state, dispatch }}>
       {children}
     </StageRaceContext.Provider>
   );
 };
 
-export const useStages = () => useContext(StageRaceContext);
+export const useStore = () => useContext(StageRaceContext);

@@ -1,7 +1,7 @@
 import moment from "moment";
 import { useState } from "react";
 import { addStageRace, deleteStageRace } from "../api";
-import { ACTIONS, useStages } from "../contexts";
+import { ACTIONS, useStore } from "../contexts";
 import uniqid from "uniqid";
 
 import { IStage, IStageRace } from "../types";
@@ -24,20 +24,22 @@ import {
 } from "./shared";
 
 const App = () => {
-  const { state, dispatch, fetchStageRaces } = useStages();
+  const { state, dispatch } = useStore();
+
+  // initial state for a new stage race
+  const initialStageRaceState = {
+    name: "",
+    stages: [] as IStage[],
+  };
+  const [newStageRace, setNewStageRace] = useState(initialStageRaceState);
 
   // initial state for stages within stage race
-  const [newStage, setNewStage] = useState({
+  const initialStageState = {
     id: "",
     name: "",
     date: "",
-  });
-
-  // initial state for a new stage race
-  const [newStageRace, setNewStageRace] = useState({
-    name: "",
-    stages: [] as IStage[],
-  });
+  };
+  const [newStage, setNewStage] = useState(initialStageState);
 
   const handleCreateNewStageRace = () => {
     setNewStageRace({ ...newStageRace, name: newStageRace.name });
@@ -50,9 +52,9 @@ const App = () => {
     try {
       await addStageRace(newStageRace).then(() => {
         dispatch({
-          type: ACTIONS.MODAL_OPEN,
+          type: ACTIONS.ADD_STAGE_RACE,
+          payload: newStageRace,
         });
-        fetchStageRaces();
       });
     } catch (error) {
       dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
@@ -62,7 +64,9 @@ const App = () => {
   const handleDeleteStageRace = async (id: number) => {
     try {
       await deleteStageRace(id).then(() => {
-        fetchStageRaces();
+        dispatch({
+          type: ACTIONS.ADD_STAGE_RACE,
+        });
       });
     } catch (error) {
       dispatch({
@@ -82,6 +86,7 @@ const App = () => {
       ...newStageRace,
       stages: [...newStageRace.stages, newStageData],
     });
+    setNewStage(initialStageState);
     dispatch({
       type: ACTIONS.STAGES_FORM,
     });
@@ -131,7 +136,7 @@ const App = () => {
                     <StageRaceListGroupItem
                       name={stageRace.name}
                       date={getEarliestDate(stageRace.stages)}
-                      key={`${stageRace.name}-${stageRace.id}`}
+                      key={`stage-race-${stageRace.id}`}
                       id={stageRace.id}
                       duration={getDuration(stageRace.stages)}
                       onDelete={() => handleDeleteStageRace(stageRace.id)}
@@ -153,12 +158,6 @@ const App = () => {
           </ButtonWrapper>
         </>
       )}
-      {state.error ? (
-        <ErrorOverlay
-          error={state.errorMessage}
-          clearError={() => dispatch({ type: ACTIONS.CLEAR_ERROR })}
-        />
-      ) : null}
 
       {!state.addStages ? (
         <Modal isOpen={state.modalOpen}>
@@ -266,6 +265,13 @@ const App = () => {
           </ButtonWrapper>
         </Modal>
       )}
+
+      {state.error ? (
+        <ErrorOverlay
+          error={state.errorMessage}
+          clearError={() => dispatch({ type: ACTIONS.CLEAR_ERROR })}
+        />
+      ) : null}
     </Container>
   );
 };
