@@ -63,11 +63,7 @@ const App = () => {
 
   const handleDeleteStageRace = async (id: number) => {
     try {
-      await deleteStageRace(id).then(() => {
-        dispatch({
-          type: ACTIONS.ADD_STAGE_RACE,
-        });
-      });
+      await deleteStageRace(id).then(() => {});
     } catch (error) {
       dispatch({
         type: ACTIONS.HAS_ERROR,

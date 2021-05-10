@@ -1,6 +1,7 @@
 import moment from "moment";
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { deleteStageRace, getStageRaces } from "../api";
+import stageRaceFormStories from "../stories/stage-race-form.stories";
 import { IStageRace } from "../types";
 
 type State = {
@@ -68,9 +69,11 @@ const stageRaceReducer = (state: State, action: any) => {
     case ACTIONS.DELETE_STAGE_RACE:
       return {
         ...state,
-        stageRaces: state.stageRaces.map(
-          (index: any) => (index = action.id ? deleteStageRace(index) : null)
-        ),
+        stageRaces: state.stageRaces.forEach((stageRace: any) => {
+          if (stageRace.id === action.payload.id) {
+            return { ...state.stageRaces, stageRace };
+          }
+        }),
       };
     case ACTIONS.HAS_ERROR:
       return {
