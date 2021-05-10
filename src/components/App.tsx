@@ -26,7 +26,6 @@ import {
 const App = () => {
   const { state, dispatch } = useStore();
 
-  // initial state for a new stage race
   const initialStageRaceState = {
     name: "",
     stages: [] as IStage[],
@@ -53,8 +52,11 @@ const App = () => {
       await addStageRace(newStageRace).then(() => {
         dispatch({
           type: ACTIONS.ADD_STAGE_RACE,
+          id: Number(state.stageRaces.length + 1),
           payload: newStageRace,
         });
+        setNewStage(initialStageState);
+        setNewStageRace(initialStageRaceState);
       });
     } catch (error) {
       dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
@@ -63,11 +65,16 @@ const App = () => {
 
   const handleDeleteStageRace = async (id: number) => {
     try {
-      await deleteStageRace(id).then(() => {});
+      await deleteStageRace(id).then(() => {
+        dispatch({
+          type: ACTIONS.DELETE_STAGE_RACE,
+          id: id,
+        });
+      });
     } catch (error) {
       dispatch({
         type: ACTIONS.HAS_ERROR,
-        message: "Error deleting stage race",
+        errorMessage: "Error deleting stage race",
       });
     }
   };
@@ -116,6 +123,8 @@ const App = () => {
 
     return sortedDates;
   };
+
+  console.log(state.stageRaces);
 
   return (
     <Container>

@@ -1,7 +1,6 @@
 import moment from "moment";
 import { createContext, useContext, useEffect, useReducer } from "react";
-import { deleteStageRace, getStageRaces } from "../api";
-import stageRaceFormStories from "../stories/stage-race-form.stories";
+import { getStageRaces } from "../api";
 import { IStageRace } from "../types";
 
 type State = {
@@ -21,6 +20,7 @@ interface IStageRaceContext {
 export const ACTIONS = {
   FETCH_SUCCESS: "fetch-success",
   ADD_STAGE_RACE: "add-stage-race",
+  FETCH_STAGE_RACES: "fetch-stage-races",
   DELETE_STAGE_RACE: "delete-stage-race",
   STAGES_FORM: "add-stages",
   MODAL_OPEN: "modal-open",
@@ -64,16 +64,12 @@ const stageRaceReducer = (state: State, action: any) => {
       return {
         ...state,
         modalOpen: false,
-        stageRaces: [...state.stageRaces, action.payload],
+        stageRaces: [...state.stageRaces, { id: action.id, ...action.payload }],
       };
     case ACTIONS.DELETE_STAGE_RACE:
       return {
         ...state,
-        stageRaces: state.stageRaces.forEach((stageRace: any) => {
-          if (stageRace.id === action.payload.id) {
-            return { ...state.stageRaces, stageRace };
-          }
-        }),
+        stageRaces: state.stageRaces.filter((_, index) => index !== action.id),
       };
     case ACTIONS.HAS_ERROR:
       return {
@@ -111,8 +107,8 @@ export const StageRaceProvider: React.FC = ({ children }) => {
     try {
       await getStageRaces().then((response: IStageRace[]) => {
         dispatch({
-          loading: true,
           type: ACTIONS.FETCH_SUCCESS,
+          loading: true,
           payload: sortStageRacesByDate(response),
         });
       });
