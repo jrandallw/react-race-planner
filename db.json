@@ -4,56 +4,28 @@
       "name": "Older",
       "stages": [
         {
-          "id": "koj3da9g",
-          "name": "Stage 1",
-          "date": "2021-05-12"
-        }
-      ],
-      "id": 2
-    },
-    {
-      "name": "Stage Race 2",
-      "stages": [
+          "id": "kokans0f",
+          "name": "Tset",
+          "date": "2021-05-20"
+        },
         {
-          "id": "koj91299",
+          "id": "kokanvhy",
           "name": "Stage 1",
-          "date": "2021-05-15"
+          "date": "2021-05-31"
         }
       ],
-      "id": 3
-    },
-    {
-      "name": "Stage 2",
-      "stages": [
-        {
-          "id": "koj92764",
-          "name": "Test",
-          "date": "2020-12-30"
-        }
-      ],
-      "id": 4
+      "id": 7
     },
     {
       "name": "Older",
       "stages": [
         {
-          "id": "koj96awy",
-          "name": "Tset",
-          "date": "2021-05-19"
+          "id": "kokao7ho",
+          "name": "Stage 2",
+          "date": "2021-05-20"
         }
       ],
-      "id": 5
-    },
-    {
-      "name": "Stage Race",
-      "stages": [
-        {
-          "id": "kokalfh1",
-          "name": "Tset",
-          "date": "2023-06-15"
-        }
-      ],
-      "id": 6
+      "id": 8
     }
   ]
 }

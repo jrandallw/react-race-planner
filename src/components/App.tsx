@@ -57,6 +57,7 @@ const App = () => {
     dispatch({
       type: ACTIONS.STAGES_FORM,
     });
+    setNewStage(initialStageState);
   };
 
   const handleDeleteStage = (id: number) => {
