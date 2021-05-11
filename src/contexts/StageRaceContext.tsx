@@ -1,28 +1,20 @@
 import moment from "moment";
-import { createContext, useContext, useEffect, useReducer } from "react";
-import { getStageRaces } from "../api";
-import { IStageRace } from "../types";
-
-type State = {
-  loading: boolean;
-  error: boolean;
-  addStages: boolean;
-  errorMessage: string;
-  modalOpen: boolean;
-  stageRaces: IStageRace[];
-};
-
-interface IStageRaceContext {
-  state: State;
-  dispatch: any;
-}
+import {
+  createContext,
+  Dispatch,
+  useContext,
+  useEffect,
+  useReducer,
+} from "react";
+import { addStageRace, deleteStageRace, getStageRaces } from "../api";
+import { IProvisionalStageRace, IStageRace } from "../types";
 
 export const ACTIONS = {
   FETCH_SUCCESS: "fetch-success",
   ADD_STAGE_RACE: "add-stage-race",
-  FETCH_STAGE_RACES: "fetch-stage-races",
   DELETE_STAGE_RACE: "delete-stage-race",
   STAGES_FORM: "add-stages",
+
   MODAL_OPEN: "modal-open",
   HAS_ERROR: "has-error",
   IS_LOADING: "is-loading",
@@ -32,27 +24,47 @@ export const ACTIONS = {
 const initialState = {
   loading: true,
   error: false,
-  stageRaces: [],
+  stageRaces: [] as IStageRace[],
   errorMessage: "",
   addStages: false,
   modalOpen: false,
 };
 
-const sortStageRacesByDate = (items: any[]) => {
-  return items.sort(
-    (first: Record<string, any>, second: Record<string, any>) => {
-      if (moment(first.stages.date).isSame(second.stages.date)) {
-        return -1;
-      } else if (moment(first.stages.date).isBefore(second.stages.date)) {
-        return -1;
-      } else {
-        return 1;
-      }
+interface IReducerState {
+  loading: boolean;
+  error: boolean;
+  stageRaces: IStageRace[];
+  errorMessage: string;
+  addStages: boolean;
+  modalOpen: boolean;
+}
+
+interface IReducerActions {
+  type: string;
+  message?: string;
+  payload?: IStageRace[] | any;
+  id?: number;
+  loading?: boolean;
+}
+
+interface IStageRaceContext {
+  state: IReducerState;
+  dispatch: Dispatch<IReducerActions>;
+  handleAddStageRace(r: IProvisionalStageRace): void;
+  handleDeleteStageRace(id: number): void;
+}
+
+export const sortStageRacesByDate = (items: IStageRace[]) => {
+  return items.sort((first: IStageRace, second: IStageRace) => {
+    if (moment(first.stages[0].date).isSameOrBefore(second.stages[0].date)) {
+      return -1;
+    } else {
+      return 1;
     }
-  );
+  });
 };
 
-const stageRaceReducer = (state: State, action: any) => {
+const stageRaceReducer = (state: IReducerState, action: IReducerActions) => {
   switch (action.type) {
     case ACTIONS.FETCH_SUCCESS:
       return {
@@ -69,7 +81,9 @@ const stageRaceReducer = (state: State, action: any) => {
     case ACTIONS.DELETE_STAGE_RACE:
       return {
         ...state,
-        stageRaces: state.stageRaces.filter((_, index) => index !== action.id),
+        stageRaces: state.stageRaces.filter(
+          (stageRace) => stageRace.id !== action.payload
+        ),
       };
     case ACTIONS.HAS_ERROR:
       return {
@@ -120,15 +134,60 @@ export const StageRaceProvider: React.FC = ({ children }) => {
     }
   };
 
+  const handleAddStageRace = async (
+    provisionalStageRace: IProvisionalStageRace
+  ) => {
+    try {
+      await addStageRace(provisionalStageRace).then(() => {
+        dispatch({
+          type: ACTIONS.ADD_STAGE_RACE,
+          id: Number(state.stageRaces.length + 1),
+          payload: provisionalStageRace,
+        });
+      });
+    } catch (error) {
+      dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
+    }
+  };
+
+  const handleDeleteStageRace = async (id: number) => {
+    try {
+      await deleteStageRace(id).then(() => {
+        dispatch({
+          type: ACTIONS.DELETE_STAGE_RACE,
+          payload: id,
+        });
+      });
+    } catch (error) {
+      dispatch({
+        type: ACTIONS.HAS_ERROR,
+        message: "Error deleting stage race",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchStageRaces();
   }, []);
 
   return (
-    <StageRaceContext.Provider value={{ state, dispatch }}>
+    <StageRaceContext.Provider
+      value={{
+        state,
+        dispatch,
+        handleAddStageRace,
+        handleDeleteStageRace,
+      }}
+    >
       {children}
     </StageRaceContext.Provider>
   );
 };
 
-export const useStore = () => useContext(StageRaceContext);
+export const useStore = () => {
+  const context = useContext(StageRaceContext);
+  if (context === undefined) {
+    throw new Error("useStore must be used within a StoreProvider");
+  }
+  return context;
+};

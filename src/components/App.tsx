@@ -1,7 +1,6 @@
 import moment from "moment";
 import { useState } from "react";
-import { addStageRace, deleteStageRace } from "../api";
-import { ACTIONS, useStore } from "../contexts";
+import { ACTIONS, sortStageRacesByDate, useStore } from "../contexts";
 import uniqid from "uniqid";
 
 import { IStage, IStageRace } from "../types";
@@ -24,7 +23,12 @@ import {
 } from "./shared";
 
 const App = () => {
-  const { state, dispatch } = useStore();
+  const {
+    state,
+    dispatch,
+    handleAddStageRace,
+    handleDeleteStageRace,
+  } = useStore();
 
   const initialStageRaceState = {
     name: "",
@@ -40,45 +44,6 @@ const App = () => {
   };
   const [newStage, setNewStage] = useState(initialStageState);
 
-  const handleCreateNewStageRace = () => {
-    setNewStageRace({ ...newStageRace, name: newStageRace.name });
-    dispatch({
-      type: ACTIONS.STAGES_FORM,
-    });
-  };
-
-  const handleAddStageRace = async () => {
-    try {
-      await addStageRace(newStageRace).then(() => {
-        dispatch({
-          type: ACTIONS.ADD_STAGE_RACE,
-          id: Number(state.stageRaces.length + 1),
-          payload: newStageRace,
-        });
-        setNewStage(initialStageState);
-        setNewStageRace(initialStageRaceState);
-      });
-    } catch (error) {
-      dispatch({ type: ACTIONS.HAS_ERROR, message: "Error adding stage race" });
-    }
-  };
-
-  const handleDeleteStageRace = async (id: number) => {
-    try {
-      await deleteStageRace(id).then(() => {
-        dispatch({
-          type: ACTIONS.DELETE_STAGE_RACE,
-          id: id,
-        });
-      });
-    } catch (error) {
-      dispatch({
-        type: ACTIONS.HAS_ERROR,
-        errorMessage: "Error deleting stage race",
-      });
-    }
-  };
-
   const handleAddStage = () => {
     const newStageData = {
       id: uniqid(),
@@ -89,7 +54,6 @@ const App = () => {
       ...newStageRace,
       stages: [...newStageRace.stages, newStageData],
     });
-    setNewStage(initialStageState);
     dispatch({
       type: ACTIONS.STAGES_FORM,
     });
@@ -124,8 +88,6 @@ const App = () => {
     return sortedDates;
   };
 
-  console.log(state.stageRaces);
-
   return (
     <Container>
       <h1 className="mb-3">Stage Races</h1>
@@ -136,18 +98,20 @@ const App = () => {
           <StageRaceListGroup>
             {state.stageRaces.length === 0
               ? "No stage races"
-              : state.stageRaces.map((stageRace: IStageRace) => {
-                  return (
-                    <StageRaceListGroupItem
-                      name={stageRace.name}
-                      date={getEarliestDate(stageRace.stages)}
-                      key={`stage-race-${stageRace.id}`}
-                      id={stageRace.id}
-                      duration={getDuration(stageRace.stages)}
-                      onDelete={() => handleDeleteStageRace(stageRace.id)}
-                    />
-                  );
-                })}
+              : sortStageRacesByDate(state.stageRaces).map(
+                  (stageRace: IStageRace) => {
+                    return (
+                      <StageRaceListGroupItem
+                        name={stageRace.name}
+                        date={getEarliestDate(stageRace.stages)}
+                        key={`stage-race-${stageRace.id}`}
+                        id={stageRace.id}
+                        duration={getDuration(stageRace.stages)}
+                        onDelete={() => handleDeleteStageRace(stageRace.id)}
+                      />
+                    );
+                  }
+                )}
           </StageRaceListGroup>
 
           <ButtonWrapper>
@@ -210,25 +174,31 @@ const App = () => {
           <ButtonWrapper>
             <SecondaryOutlineButton
               disabled={!newStageRace.name}
-              onClick={handleCreateNewStageRace}
+              onClick={() =>
+                dispatch({
+                  type: ACTIONS.STAGES_FORM,
+                })
+              }
             >
               Add Stage
             </SecondaryOutlineButton>
             <SuccessOutlineButton
               disabled={!newStageRace.stages.length}
-              onClick={handleAddStageRace}
+              onClick={() => {
+                handleAddStageRace(newStageRace);
+                setNewStage(initialStageState);
+                setNewStageRace(initialStageRaceState);
+              }}
             >
               Save
             </SuccessOutlineButton>
             <DangerOutlineButton
               onClick={() => {
-                setNewStageRace({
-                  ...newStageRace,
-                  name: "",
-                });
                 dispatch({
                   type: ACTIONS.MODAL_OPEN,
                 });
+                setNewStage(initialStageState);
+                setNewStageRace(initialStageRaceState);
               }}
             >
               Cancel

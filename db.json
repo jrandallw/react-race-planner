@@ -1,3 +1,48 @@
 {
-  "stage-races": []
+  "stage-races": [
+    {
+      "name": "Older",
+      "stages": [
+        {
+          "id": "koj3da9g",
+          "name": "Stage 1",
+          "date": "2021-05-12"
+        }
+      ],
+      "id": 2
+    },
+    {
+      "name": "Stage Race 2",
+      "stages": [
+        {
+          "id": "koj91299",
+          "name": "Stage 1",
+          "date": "2021-05-15"
+        }
+      ],
+      "id": 3
+    },
+    {
+      "name": "Stage 2",
+      "stages": [
+        {
+          "id": "koj92764",
+          "name": "Test",
+          "date": "2020-12-30"
+        }
+      ],
+      "id": 4
+    },
+    {
+      "name": "Older",
+      "stages": [
+        {
+          "id": "koj96awy",
+          "name": "Tset",
+          "date": "2021-05-19"
+        }
+      ],
+      "id": 5
+    }
+  ]
 }
